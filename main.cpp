@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 	
 	if (webSocket == INVALID_SOCKET) {
 		printf("Socket failed with error = %d\n", WSAGetLastError());
+		WSACleanup();
 		return -1;
 	}
 	
@@ -44,6 +45,8 @@ int main(int argc, char** argv) {
 	
 	if (bindValue == SOCKET_ERROR) {
 		printf("Binding failed = %d\n", WSAGetLastError() );
+		closesocket(webSocket);
+		WSACleanup();
 		return -1;
 	}
 	
@@ -99,5 +102,7 @@ int main(int argc, char** argv) {
 	
 	}	while( recvValue > 0);
 	
+	
+	WSACleanup();
 	return 0;
 }

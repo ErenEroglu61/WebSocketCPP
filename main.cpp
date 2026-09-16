@@ -6,13 +6,15 @@
 
 int main(int argc, char** argv) {
 
-    // =========================
-    // 1. Initialize Winsock
-    // =========================
 
     WORD version = MAKEWORD(2, 2);
     WSADATA wsaData;
-	const char* response = "Client sending data test";
+	const char* response =
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/plain\r\n"
+    "Content-Length: 21\r\n"
+    "\r\n"
+    "Hello from C++ server!";
 	
     int af, type, protocol;
 	
@@ -31,10 +33,6 @@ int main(int argc, char** argv) {
     }
 
 
-    // =========================
-    // 2. Create Socket
-    // =========================
-
     SOCKET webSocket = socket(af, type, protocol);
 
     if (webSocket == INVALID_SOCKET) {
@@ -48,9 +46,6 @@ int main(int argc, char** argv) {
     }
 
 
-    // =========================
-    // 3. Configure Server Address
-    // =========================
 
     sockaddr_in serverAdress;
 
@@ -58,10 +53,6 @@ int main(int argc, char** argv) {
     serverAdress.sin_port = htons(8080);
     serverAdress.sin_addr.S_un.S_addr = INADDR_ANY;
 
-
-    // =========================
-    // 4. Bind Socket
-    // =========================
 
     int bindValue = bind(
         webSocket,
@@ -183,17 +174,23 @@ int main(int argc, char** argv) {
                 WSAGetLastError()
             );
         }
+        
+        int sendValue =	send(AcceptSocket,response,(int)strlen(response),0);
+	
+		if (sendValue == SOCKET_ERROR) {
+			printf("Send failed with error: %d\n", WSAGetLastError);
+			closesocket(AcceptSocket);
+			WSACleanup();
+			return -1;
+		}
+		
+		else {
+			printf("Send successful!");
+		}
 
     } while (recvValue > 0);
 
-	sendValue =	send(AcceptSocket,response,(int)strlen(response),0);
 	
-	if (sendValue == SOCKET_ERROR) {
-		printf("Send failed with error: %d\n", WSAGetLastError);
-		closesocket(AcceptSocket);
-		WSACleanup();
-		return -1;
-	}
 	
     closesocket(AcceptSocket);
     closesocket(webSocket);
